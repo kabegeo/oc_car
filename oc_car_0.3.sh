@@ -137,7 +137,7 @@ echo lng:$lngZ
 echo lat:$latZ
 
 # Die Route wird über project-osrm abgerufen und in die Datei route.gpx gespeichert
-curl "http://router.project-osrm.org/viaroute?loc=$latS,$lngS&loc=$latZ,$lngZ&output=gpx&alt=false" > ./route.gpx
+curl "http://router.project-osrm.org/viaroute?loc=$latS,$lngS&loc=$latZ,$lngZ&output=gpx&alt=false" -s > ./route.gpx
 
 #Überprüfen der gpx Datei
 	if gpsbabel -i gpx -f route.gpx -o gpx -F - > /dev/null; then

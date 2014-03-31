@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 #Version 0.3.1 / 30.03.2014
 #Mailtext im Menü änderbar
 #keine Größenbeschränkung mehr
@@ -49,6 +49,7 @@ echo "tls=\"tls=yes\""
 echo "smtp=\"smtp.gmail.com:587\""
 echo "mailuser=\"absender@gmail.com\""
 echo "mailpassword=\"password\""
+echo "subject=\"oc_car.sh - Die GPX für Deine Route\""
 echo "body=\"Die gpx für deine Route!\""
 } >> ./oc_car.conf
 
@@ -77,6 +78,7 @@ echo "[U]ser: " $ocUser
 echo "[R]adius: " $Radius
 echo "[S]tart: " $Start
 echo "[Z]iel: " $Ziel
+echo "[B]etreffzeile: " $subject
 echo "[M]ail Text: " $body
 echo "Für den Emailversand werden die in oc_car.conf hinterlegten Parameter genutzt."
 echo ""
@@ -86,7 +88,7 @@ else
 echo "Es wurde keine gültige gpx-Datei übergeben. Es wird eine neue Route berechnet."
 fi
 echo ""
-echo "Sollen Parameter geändert werden? [N]ein, [E]nde -> [U,R,S,Z,N,E]"
+echo "Sollen Parameter geändert werden? [N]ein, [E]nde -> [U,R,S,Z,B,M,N,E]"
 read answer
 case $answer in
 u*|U*) echo "Bitte neuen User eingeben:" ; read ocUser ;
@@ -105,6 +107,10 @@ z*|Z*) echo "Bitte neues Ziel eingeben:" ; read Ziel ;
 grep -v Ziel oc_car.conf > tempdatei;
 mv tempdatei oc_car.conf;
 echo "Ziel=$Ziel" >> oc_car.conf;;
+b*|B*) echo "Bitte neuen Emailbetreff eingeben:" ; read subject ;
+grep -v subject oc_car.conf > tempdatei;
+mv tempdatei oc_car.conf;
+echo "subject=\"$subject\"" >> oc_car.conf;;
 m*|M*) echo "Bitte neuen Email Text eingeben:" ; read body ;
 grep -v body oc_car.conf > tempdatei;
 mv tempdatei oc_car.conf;
@@ -292,7 +298,7 @@ loop=$(($zahl / 500))
 
 for (( c=0; c<=$loop; c++ ))
 do
-spalte=$[(c * 500) + 1]
+spalte=$[($c * 500) + 1]
 f=$(echo $a | cut -d" " -f$spalte-$(($spalte+499)))
 
 #echo $f
@@ -305,7 +311,7 @@ g="$(echo "$f" | sed 's/'\ '/'\|'/g')"
 var2=$(curl "http://www.opencaching.de/okapi/services/caches/formatters/gpx?cache_codes=${g}&consumer_key=8YV657YqzqDcVC3QC9wM&ns_ground=true&latest_logs=true&mark_found=true&user_uuid=$UUID" -s)
 echo "$var2" >> $output
 echo "Die Datei "$output" wird hier im Verzeichnis abgelegt und per Mail versendet."
-sendemail -f $sender -t $receiver -o $tls -s $smtp -xu $mailuser -xp $mailpassword -m $body -a $output
+sendemail -f $sender -t $receiver -o $tls -s $smtp -xu $mailuser -xp $mailpassword -u $"$subject GPX$[($c + 1)] von $[($loop + 1)]" -m $body -a $output
 done
 exit
 
